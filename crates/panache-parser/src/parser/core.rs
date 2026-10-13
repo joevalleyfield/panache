@@ -1765,6 +1765,8 @@ impl<'a> Parser<'a> {
 
         self.close_dedented_definition_lists(content);
 
+        self.close_list_items_without_lazy_paragraph(content);
+
         let content_indent = self.content_container_indent_to_strip();
         let (stripped_content, indent_to_emit) = strip_content_indent(content, content_indent);
 

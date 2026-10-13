@@ -54,6 +54,40 @@ impl<'a> Parser<'a> {
             && buffer.is_open_grid_table(*content_col)
     }
 
+    /// Under CommonMark, close the list items a non-blank line doesn't
+    /// continue: a line indented less than the innermost item's content
+    /// column continues that item only as paragraph continuation text (a
+    /// lazy line, §5.2), so with no paragraph open in the item (it is only
+    /// its marker so far, or its last block was a heading, fenced code, an
+    /// HTML block, ...) the line closes it.
+    ///
+    /// Runs before block dispatch, so the line is then read at the level it
+    /// belongs to: `*\n]\n -` is an empty item and a setext heading.
+    /// List marker lines are left to the list parser, which decides between
+    /// sibling, nested and new lists itself.
+    pub(super) fn close_list_items_without_lazy_paragraph(&mut self, content: &str) {
+        if self.config.dialect != crate::options::Dialect::CommonMark || is_blank_line(content) {
+            return;
+        }
+        let Some(Container::ListItem {
+            content_col,
+            buffer,
+            ..
+        }) = self.containers.last()
+        else {
+            return;
+        };
+        let (indent_cols, _) = leading_indent(content);
+        if indent_cols >= *content_col
+            || buffer.has_open_paragraph(*content_col)
+            || lists::try_parse_list_marker(content, self.config, lists::OpenListHint::None)
+                .is_some()
+        {
+            return;
+        }
+        self.close_lists_above_indent(indent_cols);
+    }
+
     pub(super) fn emit_list_item_buffer_if_needed(&mut self) {
         if let Some(Container::ListItem { buffer, .. }) = self.containers.stack.last_mut()
             && !buffer.is_empty()

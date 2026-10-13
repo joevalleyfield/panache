@@ -1007,6 +1007,7 @@ golden_test_cases!(
     list_item_grid_table_continuation_blank_pandoc,
     list_item_grid_table_marker_line_pandoc,
     list_item_html_div_multiline_open_commonmark,
+    list_item_lazy_line_needs_paragraph_commonmark,
     list_item_html_div_multiline_open_pandoc,
     list_item_html_div_multiline_para_commonmark,
     list_item_html_div_multiline_para_pandoc,
