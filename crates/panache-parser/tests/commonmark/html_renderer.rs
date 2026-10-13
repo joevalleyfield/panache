@@ -449,6 +449,9 @@ fn render_list_item(
             SyntaxKind::HORIZONTAL_RULE => {
                 out.push_str("<hr />\n");
             }
+            SyntaxKind::HTML_BLOCK => {
+                render_html_block(&child, out);
+            }
             SyntaxKind::BLANK_LINE => {}
             _ => {}
         }
@@ -740,6 +743,14 @@ fn render_html_block(node: &SyntaxNode, out: &mut String) {
         strip_blockquote_prefix_per_line(&text, depth)
     } else {
         text
+    };
+    // Inside a list item, the block's lines carry the item's indentation,
+    // which is container structure, not HTML.
+    let li_indent = enclosing_list_item_content_column(node);
+    let stripped = if li_indent > 0 {
+        strip_leading_spaces_per_line(&stripped, li_indent)
+    } else {
+        stripped
     };
     let trimmed = stripped.trim_end_matches('\n');
     out.push_str(trimmed);

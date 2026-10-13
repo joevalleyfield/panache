@@ -1,0 +1,90 @@
+---
+source: crates/panache-parser/tests/golden_parser_cases.rs
+expression: cst_output
+---
+DOCUMENT@0..150
+  BLOCK_QUOTE@0..24
+    BLOCK_QUOTE_MARKER@0..1 ">"
+    WHITESPACE@1..2 " "
+    LIST@2..24
+      LIST_ITEM@2..24
+        LIST_MARKER@2..3 "-"
+        WHITESPACE@3..4 " "
+        HTML_BLOCK@4..24
+          HTML_BLOCK_TAG@4..16
+            TEXT@4..15 "<!-- quoted"
+            NEWLINE@15..16 "\n"
+          HTML_BLOCK_TAG@16..24
+            LINE_PREFIX@16..17 ">"
+            LINE_PREFIX@17..18 " "
+            TEXT@18..23 "  -->"
+            NEWLINE@23..24 "\n"
+  BLANK_LINE@24..25
+    BLANK_LINE@24..25 "\n"
+  LIST@25..102
+    LIST_ITEM@25..44
+      LIST_MARKER@25..26 "-"
+      WHITESPACE@26..27 " "
+      HTML_BLOCK@27..44
+        HTML_BLOCK_TAG@27..44
+          TEXT@27..43 "<!-- comment -->"
+          NEWLINE@43..44 "\n"
+    LIST_ITEM@44..69
+      LIST_MARKER@44..45 "-"
+      WHITESPACE@45..46 " "
+      HTML_BLOCK@46..69
+        HTML_BLOCK_TAG@46..52
+          TEXT@46..51 "<div>"
+          NEWLINE@51..52 "\n"
+        HTML_BLOCK_CONTENT@52..69
+          TEXT@52..59 "  block"
+          NEWLINE@59..60 "\n"
+          TEXT@60..68 "  </div>"
+          NEWLINE@68..69 "\n"
+    LIST_ITEM@69..78
+      LIST_MARKER@69..70 "-"
+      WHITESPACE@70..71 " "
+      HTML_BLOCK@71..78
+        HTML_BLOCK_TAG@71..78
+          TEXT@71..77 "<?pi?>"
+          NEWLINE@77..78 "\n"
+    LIST_ITEM@78..102
+      LIST_MARKER@78..79 "-"
+      WHITESPACE@79..80 " "
+      HTML_BLOCK@80..102
+        HTML_BLOCK_TAG@80..93
+          TEXT@80..92 "<custom-tag>"
+          NEWLINE@92..93 "\n"
+        HTML_BLOCK_CONTENT@93..102
+          TEXT@93..101 "  type 7"
+          NEWLINE@101..102 "\n"
+  BLANK_LINE@102..103
+    BLANK_LINE@102..103 "\n"
+  LIST@103..129
+    LIST_ITEM@103..129
+      LIST_MARKER@103..105 "1."
+      WHITESPACE@105..106 " "
+      HTML_BLOCK@106..120
+        HTML_BLOCK_TAG@106..113
+          TEXT@106..112 "<!-- c"
+          NEWLINE@112..113 "\n"
+        HTML_BLOCK_TAG@113..120
+          TEXT@113..119 "   -->"
+          NEWLINE@119..120 "\n"
+      PLAIN@120..129
+        TEXT@120..128 "   after"
+        NEWLINE@128..129 "\n"
+  BLANK_LINE@129..130
+    BLANK_LINE@129..130 "\n"
+  LIST@130..150
+    LIST_ITEM@130..150
+      LIST_MARKER@130..131 "-"
+      WHITESPACE@131..132 " "
+      LIST@132..150
+        LIST_ITEM@132..150
+          LIST_MARKER@132..133 "-"
+          WHITESPACE@133..134 " "
+          HTML_BLOCK@134..150
+            HTML_BLOCK_TAG@134..150
+              TEXT@134..149 "<!-- nested -->"
+              NEWLINE@149..150 "\n"

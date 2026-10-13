@@ -166,6 +166,67 @@ impl<'a> Parser<'a> {
         Some(new_pos.saturating_sub(self.pos).saturating_sub(1))
     }
 
+    /// When a new list item's marker line opens an HTML block
+    /// (`- <!-- c -->`, `- <div>`), emit the HTML block as the item's
+    /// content instead of buffering the line as paragraph text.
+    ///
+    /// CommonMark parses a list item's content as a fresh block sequence
+    /// (§5.2), so all seven HTML block start conditions apply at the item's
+    /// content column, type 7 included (nothing is being interrupted). The
+    /// dispatcher's `HtmlBlockParser` never sees the marker line, because the
+    /// list parser consumes it and buffers the post-marker text, so without
+    /// this the line read as inline HTML in a `PLAIN`, and a multi-line block
+    /// was cut at its first line. Mirrors
+    /// [`Self::maybe_open_fenced_code_in_new_list_item`]; the block runs to its
+    /// own end condition across the item's continuation lines.
+    ///
+    /// CommonMark dialect only: Pandoc's marker-line HTML goes through the
+    /// buffer's emit-time lift (`try_emit_html_block_lift`).
+    ///
+    /// Returns the number of source lines consumed beyond the marker line.
+    pub(super) fn maybe_open_html_block_in_new_list_item(&mut self) -> Option<usize> {
+        if self.config.dialect != crate::options::Dialect::CommonMark
+            || !self.config.extensions.raw_html
+        {
+            return None;
+        }
+        let Some(Container::ListItem {
+            content_col,
+            buffer,
+            ..
+        }) = self.containers.stack.last()
+        else {
+            return None;
+        };
+        let content_col = *content_col;
+        let text = buffer.sole_text_segment()?;
+        let (first_line, _) = strip_newline(text.split_inclusive('\n').next().unwrap_or(text));
+        let block_type = html_blocks::try_parse_html_block_start(first_line, true)?;
+        if let Some(Container::ListItem { buffer, .. }) = self.containers.stack.last_mut() {
+            buffer.clear();
+        }
+        let bq_depth = self.current_blockquote_depth();
+        let prefix = ContainerPrefix::from_scalars(
+            bq_depth,
+            content_col,
+            bq_depth > 0,
+            0,
+            true,
+            self.config.dialect,
+        );
+        let new_pos = html_blocks::parse_html_block_with_wrapper(
+            &mut self.builder,
+            &self.lines,
+            self.pos,
+            block_type,
+            &prefix,
+            SyntaxKind::HTML_BLOCK,
+            html_blocks::SoftbreakFusion::None,
+            self.config,
+        );
+        Some(new_pos.saturating_sub(self.pos).saturating_sub(1))
+    }
+
     /// When a new list item's marker line opens a line block (`- | a`), emit
     /// the line block as the item's content instead of buffering the line as
     /// text.
@@ -1071,6 +1132,9 @@ impl<'a> Parser<'a> {
                     if let Some(extras) = self.maybe_open_fenced_code_in_new_list_item() {
                         return extras;
                     }
+                    if let Some(extras) = self.maybe_open_html_block_in_new_list_item() {
+                        return extras;
+                    }
                     if let Some(extras) = self.maybe_open_caption_table_in_new_list_item() {
                         return extras;
                     }
@@ -1101,6 +1165,9 @@ impl<'a> Parser<'a> {
                 self.config,
             );
             if let Some(extras) = self.maybe_open_fenced_code_in_new_list_item() {
+                return extras;
+            }
+            if let Some(extras) = self.maybe_open_html_block_in_new_list_item() {
                 return extras;
             }
             if let Some(extras) = self.maybe_open_caption_table_in_new_list_item() {
@@ -1152,6 +1219,9 @@ impl<'a> Parser<'a> {
                 )
             };
             if let Some(extras) = self.maybe_open_fenced_code_in_new_list_item() {
+                return extras;
+            }
+            if let Some(extras) = self.maybe_open_html_block_in_new_list_item() {
                 return extras;
             }
             if let Some(extras) = self.maybe_open_caption_table_in_new_list_item() {
@@ -1213,6 +1283,9 @@ impl<'a> Parser<'a> {
             )
         };
         if let Some(extras) = self.maybe_open_fenced_code_in_new_list_item() {
+            return extras;
+        }
+        if let Some(extras) = self.maybe_open_html_block_in_new_list_item() {
             return extras;
         }
         if let Some(extras) = self.maybe_open_caption_table_in_new_list_item() {
