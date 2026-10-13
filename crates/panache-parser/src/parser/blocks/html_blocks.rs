@@ -1729,6 +1729,17 @@ pub(crate) fn parse_html_block_with_wrapper(
             break;
         }
 
+        // CommonMark §5.2: a non-blank line indented less than the list
+        // item's content column is not part of the item, and an HTML block
+        // takes no lazy continuation lines, so the block ends with the item.
+        if config.dialect == crate::options::Dialect::CommonMark
+            && prefix.list_content_col() > 0
+            && !inner.trim().is_empty()
+            && !prefix.resolve(line).reaches_frame()
+        {
+            break;
+        }
+
         if blank_terminated && inner.trim().is_empty() {
             break;
         }
