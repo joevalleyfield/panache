@@ -2253,6 +2253,8 @@ impl<'a> Parser<'a> {
                     self.close_open_footnote_definition();
                 }
 
+                self.note_block_in_list_item();
+
                 let lines_consumed = {
                     let stripped = StrippedLines::new(&self.lines, self.pos, &dispatcher_prefix);
                     self.block_registry.parse_prepared(
@@ -2484,6 +2486,8 @@ impl<'a> Parser<'a> {
                 if matches!(block_match.effect, BlockEffect::OpenFootnoteDefinition) {
                     self.close_open_footnote_definition();
                 }
+
+                self.note_block_in_list_item();
 
                 let lines_consumed = {
                     let stripped = StrippedLines::new(&self.lines, self.pos, &dispatcher_prefix);

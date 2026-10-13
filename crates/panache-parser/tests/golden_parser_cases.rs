@@ -558,6 +558,7 @@ golden_test_cases!(
     emphasis_run_split_single_closer_commonmark,
     emphasis_skips_shortcut_reference_link,
     emphasis_underscore_run_5_commonmark,
+    empty_list_marker_blank_then_block_commonmark,
     empty_list_marker_blank_then_content_commonmark,
     empty_list_marker_blank_then_content_pandoc,
     equation_attributes,
