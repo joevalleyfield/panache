@@ -1,0 +1,107 @@
+---
+source: crates/panache-parser/tests/golden_parser_cases.rs
+expression: cst_output
+---
+DOCUMENT@0..189
+  LIST@0..16
+    LIST_ITEM@0..16
+      LIST_MARKER@0..1 "-"
+      WHITESPACE@1..2 " "
+      PLAIN@2..16
+        TEXT@2..15 "after a blank"
+        NEWLINE@15..16 "\n"
+  BLANK_LINE@16..17
+    BLANK_LINE@16..17 "\n"
+  BLOCK_QUOTE@17..33
+    BLOCK_QUOTE_MARKER@17..18 ">"
+    WHITESPACE@18..19 " "
+    LIST@19..33
+      LIST_ITEM@19..33
+        LIST_MARKER@19..20 "-"
+        WHITESPACE@20..21 " "
+        PLAIN@21..33
+          TEXT@21..32 "quoted list"
+          NEWLINE@32..33 "\n"
+  BLANK_LINE@33..34
+    BLANK_LINE@33..34 "\n"
+  LIST@34..45
+    LIST_ITEM@34..45
+      LIST_MARKER@34..35 "*"
+      WHITESPACE@35..36 " "
+      PLAIN@36..45
+        TEXT@36..44 "no blank"
+        NEWLINE@44..45 "\n"
+  BLOCK_QUOTE@45..54
+    BLOCK_QUOTE_MARKER@45..46 ">"
+    WHITESPACE@46..47 " "
+    PARAGRAPH@47..54
+      TEXT@47..53 "quoted"
+      NEWLINE@53..54 "\n"
+  BLANK_LINE@54..55
+    BLANK_LINE@54..55 "\n"
+  LIST@55..85
+    LIST_ITEM@55..85
+      LIST_MARKER@55..57 "1."
+      WHITESPACE@57..58 " "
+      PLAIN@58..85
+        TEXT@58..84 "indented code in the  ..."
+        NEWLINE@84..85 "\n"
+  BLANK_LINE@85..86
+    BLANK_LINE@85..86 "\n"
+  BLOCK_QUOTE@86..97
+    BLOCK_QUOTE_MARKER@86..87 ">"
+    WHITESPACE@87..88 " "
+    CODE_BLOCK@88..97
+      CODE_CONTENT@88..97
+        WHITESPACE@88..92 "    "
+        TEXT@92..96 "code"
+        NEWLINE@96..97 "\n"
+  BLANK_LINE@97..98
+    BLANK_LINE@97..98 "\n"
+  BLOCK_QUOTE@98..138
+    BLOCK_QUOTE_MARKER@98..99 ">"
+    WHITESPACE@99..100 " "
+    LIST@100..117
+      LIST_ITEM@100..117
+        LIST_MARKER@100..101 "-"
+        WHITESPACE@101..102 " "
+        PLAIN@102..117
+          TEXT@102..116 "inside a quote"
+          NEWLINE@116..117 "\n"
+    BLOCK_QUOTE_MARKER@117..118 ">"
+    BLANK_LINE@118..119
+      BLANK_LINE@118..119 "\n"
+    BLOCK_QUOTE_MARKER@119..120 ">"
+    WHITESPACE@120..121 " "
+    BLOCK_QUOTE@121..138
+      BLOCK_QUOTE_MARKER@121..122 ">"
+      WHITESPACE@122..123 " "
+      LIST@123..138
+        LIST_ITEM@123..138
+          LIST_MARKER@123..124 "-"
+          WHITESPACE@124..125 " "
+          PLAIN@125..138
+            TEXT@125..137 "nested quote"
+            NEWLINE@137..138 "\n"
+  BLANK_LINE@138..139
+    BLANK_LINE@138..139 "\n"
+  LIST@139..189
+    LIST_ITEM@139..189
+      LIST_MARKER@139..140 "+"
+      WHITESPACE@140..141 " "
+      PLAIN@141..164
+        TEXT@141..163 "indented into the item"
+        NEWLINE@163..164 "\n"
+      BLANK_LINE@164..165
+        BLANK_LINE@164..165 "\n"
+      BLOCK_QUOTE@165..189
+        WHITESPACE@165..167 "  "
+        BLOCK_QUOTE_MARKER@167..168 ">"
+        WHITESPACE@168..169 " "
+        LIST@169..189
+          LIST_ITEM@169..189
+            LIST_MARKER@169..170 "-"
+            WHITESPACE@170..171 " "
+            PLAIN@171..189
+              TEXT@171..188 "stays in the item"
+              NEWLINE@188..189 "\n"

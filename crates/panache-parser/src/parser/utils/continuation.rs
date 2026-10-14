@@ -177,6 +177,43 @@ impl<'a, 'cfg> ContinuationPolicy<'a, 'cfg> {
                         continue;
                     }
 
+                    let item_content_col = containers
+                        .stack
+                        .get(i + 1)
+                        .and_then(|c| match c {
+                            crate::parser::utils::container_stack::Container::ListItem {
+                                content_col,
+                                ..
+                            } => Some(*content_col),
+                            _ => None,
+                        })
+                        .unwrap_or(1);
+
+                    // A next line that opens a blockquote this list isn't in
+                    // has that `>` as its content at the list's level: it
+                    // continues the list only as item content indented to the
+                    // item's column (`- x\n\n  > q`). What the quote holds (a
+                    // list marker, indented text) belongs to the quote, not
+                    // to this list.
+                    let quotes_around_list = containers.stack[..i]
+                        .iter()
+                        .filter(|c| {
+                            matches!(
+                                c,
+                                crate::parser::utils::container_stack::Container::BlockQuote { .. }
+                            )
+                        })
+                        .count();
+                    if next_bq_depth > quotes_around_list {
+                        let at_list_level =
+                            strip_n_blockquote_markers(next_line, quotes_around_list);
+                        let (quote_indent, _) = leading_indent(at_list_level);
+                        if quote_indent.saturating_sub(content_indent_so_far) >= item_content_col {
+                            keep_level = i + 1;
+                        }
+                        continue;
+                    }
+
                     let effective_indent = raw_indent_cols.saturating_sub(content_indent_so_far);
                     let continues_list = if let Some(ref marker_match) = next_marker {
                         let indent_in_range = match marker {
@@ -217,17 +254,6 @@ impl<'a, 'cfg> ContinuationPolicy<'a, 'cfg> {
                         lists::markers_match(marker, &marker_match.marker, self.config.dialect)
                             && indent_in_range
                     } else {
-                        let item_content_col = containers
-                            .stack
-                            .get(i + 1)
-                            .and_then(|c| match c {
-                                crate::parser::utils::container_stack::Container::ListItem {
-                                    content_col,
-                                    ..
-                                } => Some(*content_col),
-                                _ => None,
-                            })
-                            .unwrap_or(1);
                         effective_indent >= item_content_col
                     };
                     if continues_list {

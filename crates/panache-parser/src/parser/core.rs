@@ -1032,6 +1032,15 @@ impl<'a> Parser<'a> {
                 self.close_containers_to(self.containers.depth() - 1);
             }
 
+            // CommonMark: a blockquote start isn't paragraph continuation
+            // text, so a `>` that doesn't reach an open list item's content
+            // column ends that item (`- x\n> q` is a list, then a quote).
+            if self.config.dialect == crate::options::Dialect::CommonMark {
+                let at_current_depth =
+                    blockquotes::strip_n_blockquote_markers(line, current_bq_depth);
+                self.close_lists_above_indent(leading_indent(at_current_depth).0);
+            }
+
             let marker_info = self.marker_info_for_line(
                 blockquote_payload.as_ref(),
                 line,
