@@ -320,6 +320,29 @@ impl ListItemBuffer {
     ///
     /// Used to decide between Plain (tight) and PARAGRAPH (loose).
     /// Returns true if there's a blank line followed by more content.
+    /// Whether the buffered text ends in an open paragraph, which a lazy
+    /// continuation line could extend. False when the buffer holds no
+    /// non-blank text (an item that so far is only its marker), or only a
+    /// single line that emits as an ATX heading or thematic break.
+    /// `content_col` is the item's content column: continuation lines carry
+    /// up to that much item indentation, which isn't part of the block.
+    pub(crate) fn has_open_paragraph(&self, content_col: usize) -> bool {
+        let text = self.get_text_for_parsing();
+        let mut lines = text.lines().filter(|line| !line.trim().is_empty());
+        let Some(first) = lines.next() else {
+            return false;
+        };
+        let item_indent = first
+            .bytes()
+            .take(content_col)
+            .take_while(|&b| b == b' ')
+            .count();
+        let first = &first[item_indent..];
+        lines.next().is_some()
+            || (try_parse_atx_heading(first).is_none()
+                && try_parse_horizontal_rule(first).is_none())
+    }
+
     pub(crate) fn has_blank_lines_between_content(&self) -> bool {
         log::trace!(
             "has_blank_lines_between_content: segments={} result=false",

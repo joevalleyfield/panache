@@ -54,6 +54,55 @@ impl<'a> Parser<'a> {
             && buffer.is_open_grid_table(*content_col)
     }
 
+    /// Whether the list marker in `block_match` would open a list inside the
+    /// innermost list item that may not interrupt the paragraph buffered
+    /// there, so the line is paragraph continuation text instead.
+    ///
+    /// CommonMark §5.2, exception 1: a list that interrupts a paragraph must
+    /// not start with an empty item, and an ordered one must start at `1`
+    /// (`1. a\n   9. b`, `- a\n  * `). The top-level rule lives in the
+    /// dispatch arm. A marker that doesn't reach the item's content column
+    /// isn't a list nested in the item, and is left to the list parser.
+    pub(super) fn commonmark_sublist_cannot_interrupt(
+        &self,
+        block_match: &crate::parser::block_dispatcher::PreparedBlockMatch,
+        content: &str,
+    ) -> bool {
+        use crate::parser::block_dispatcher::ListPrepared;
+        use crate::parser::blocks::lists::OrderedMarker;
+
+        if self.config.dialect != crate::options::Dialect::CommonMark {
+            return false;
+        }
+        let Some(Container::ListItem {
+            content_col,
+            buffer,
+            ..
+        }) = self.containers.last()
+        else {
+            return false;
+        };
+        let Some(prepared) = block_match
+            .payload
+            .as_ref()
+            .and_then(|p| p.downcast_ref::<ListPrepared>())
+        else {
+            return false;
+        };
+        if prepared.indent_cols < *content_col || !buffer.has_open_paragraph(*content_col) {
+            return false;
+        }
+        let starts_at_one = match &prepared.marker {
+            ListMarker::Bullet(_) => true,
+            ListMarker::Ordered(OrderedMarker::Decimal { number, .. }) => number == "1",
+            _ => false,
+        };
+        let after_marker = content
+            .get(prepared.indent_bytes + prepared.marker_len..)
+            .unwrap_or("");
+        !starts_at_one || after_marker.trim().is_empty()
+    }
+
     pub(super) fn emit_list_item_buffer_if_needed(&mut self) {
         if let Some(Container::ListItem { buffer, .. }) = self.containers.stack.last_mut()
             && !buffer.is_empty()

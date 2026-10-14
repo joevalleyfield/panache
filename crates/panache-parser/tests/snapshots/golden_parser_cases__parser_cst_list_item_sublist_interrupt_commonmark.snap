@@ -1,0 +1,119 @@
+---
+source: crates/panache-parser/tests/golden_parser_cases.rs
+expression: cst_output
+---
+DOCUMENT@0..261
+  LIST@0..54
+    LIST_ITEM@0..54
+      LIST_MARKER@0..2 "1."
+      WHITESPACE@2..3 " "
+      PLAIN@3..54
+        TEXT@3..26 "ordered start above one"
+        NEWLINE@26..27 "\n"
+        LINE_PREFIX@27..30 "   "
+        TEXT@30..53 "9. stays paragraph text"
+        NEWLINE@53..54 "\n"
+  BLANK_LINE@54..55
+    BLANK_LINE@54..55 "\n"
+  LIST@55..261
+    LIST_ITEM@55..105
+      LIST_MARKER@55..56 "-"
+      WHITESPACE@56..57 " "
+      PLAIN@57..105
+        TEXT@57..78 "parenthesis delimiter"
+        NEWLINE@78..79 "\n"
+        LINE_PREFIX@79..81 "  "
+        TEXT@81..104 "2) stays paragraph text"
+        NEWLINE@104..105 "\n"
+    BLANK_LINE@105..106
+      BLANK_LINE@105..106 "\n"
+    LIST_ITEM@106..125
+      LIST_MARKER@106..107 "-"
+      WHITESPACE@107..108 " "
+      PLAIN@108..125
+        TEXT@108..120 "empty bullet"
+        NEWLINE@120..121 "\n"
+        LINE_PREFIX@121..123 "  "
+        TEXT@123..124 "*"
+        NEWLINE@124..125 "\n"
+    BLANK_LINE@125..126
+      BLANK_LINE@125..126 "\n"
+    LIST_ITEM@126..147
+      LIST_MARKER@126..127 "-"
+      WHITESPACE@127..128 " "
+      PLAIN@128..147
+        TEXT@128..141 "empty ordered"
+        NEWLINE@141..142 "\n"
+        LINE_PREFIX@142..144 "  "
+        TEXT@144..146 "1."
+        NEWLINE@146..147 "\n"
+    BLANK_LINE@147..148
+      BLANK_LINE@147..148 "\n"
+    LIST_ITEM@148..175
+      LIST_MARKER@148..149 "-"
+      WHITESPACE@149..150 " "
+      PLAIN@150..164
+        TEXT@150..163 "starts at one"
+        NEWLINE@163..164 "\n"
+      LIST@164..175
+        LIST_ITEM@164..175
+          WHITESPACE@164..166 "  "
+          LIST_MARKER@166..168 "1."
+          WHITESPACE@168..169 " "
+          PLAIN@169..175
+            TEXT@169..174 "nests"
+            NEWLINE@174..175 "\n"
+    BLANK_LINE@175..176
+      BLANK_LINE@175..176 "\n"
+    LIST_ITEM@176..195
+      LIST_MARKER@176..177 "-"
+      WHITESPACE@177..178 " "
+      PLAIN@178..185
+        TEXT@178..184 "bullet"
+        NEWLINE@184..185 "\n"
+      LIST@185..195
+        LIST_ITEM@185..195
+          WHITESPACE@185..187 "  "
+          LIST_MARKER@187..188 "-"
+          WHITESPACE@188..189 " "
+          PLAIN@189..195
+            TEXT@189..194 "nests"
+            NEWLINE@194..195 "\n"
+    BLANK_LINE@195..196
+      BLANK_LINE@195..196 "\n"
+    LIST_ITEM@196..229
+      LIST_MARKER@196..197 "-"
+      WHITESPACE@197..198 " "
+      PLAIN@198..217
+        TEXT@198..216 "after a blank line"
+        NEWLINE@216..217 "\n"
+      BLANK_LINE@217..218
+        BLANK_LINE@217..218 "\n"
+      LIST@218..229
+        LIST_ITEM@218..229
+          WHITESPACE@218..220 "  "
+          LIST_MARKER@220..222 "9."
+          WHITESPACE@222..223 " "
+          PLAIN@223..229
+            TEXT@223..228 "nests"
+            NEWLINE@228..229 "\n"
+    BLANK_LINE@229..230
+      BLANK_LINE@229..230 "\n"
+    LIST_ITEM@230..261
+      LIST_MARKER@230..231 "-"
+      WHITESPACE@231..232 " "
+      HEADING@232..250
+        ATX_HEADING_MARKER@232..233
+          ATX_HEADING_MARKER@232..233 "#"
+        WHITESPACE@233..234 " "
+        HEADING_CONTENT@234..249
+          TEXT@234..249 "after a heading"
+        NEWLINE@249..250 "\n"
+      LIST@250..261
+        LIST_ITEM@250..261
+          WHITESPACE@250..252 "  "
+          LIST_MARKER@252..254 "9."
+          WHITESPACE@254..255 " "
+          PLAIN@255..261
+            TEXT@255..260 "nests"
+            NEWLINE@260..261 "\n"

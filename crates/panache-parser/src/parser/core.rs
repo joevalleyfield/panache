@@ -2374,6 +2374,15 @@ impl<'a> Parser<'a> {
                     }
 
                     if matches!(block_match.effect, BlockEffect::OpenList)
+                        && self.commonmark_sublist_cannot_interrupt(block_match, content)
+                    {
+                        self.append_lazy_continuation_line(
+                            line_to_append.unwrap_or(self.lines[self.pos]),
+                        );
+                        return LineDispatch::consumed(1);
+                    }
+
+                    if matches!(block_match.effect, BlockEffect::OpenList)
                         && self.try_lazy_list_continuation(block_match, content)
                     {
                         return LineDispatch::consumed(1);
