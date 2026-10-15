@@ -807,22 +807,17 @@ pub(in crate::parser) fn emit_list_item(
     }
 
     let content_start = item.indent_bytes + item.marker_len + item.spaces_after_bytes;
-    // CommonMark §5.2 rule 3: an item that starts with a blank line has its
-    // content one column past the marker, however many spaces trail it.
-    let starts_blank = item
-        .content
-        .get(content_start..)
-        .is_none_or(|rest| trim_end_newlines(rest).trim().is_empty());
-    let content_col = if config.dialect == crate::Dialect::CommonMark && starts_blank {
-        item.indent_cols + item.marker_len + 1
+    // CommonMark gives an empty marker one logical space of padding,
+    // regardless of the whitespace actually present on its line.
+    let spaces_after_cols = if config.dialect == crate::Dialect::CommonMark
+        && item.content[content_start..].trim().is_empty()
+    {
+        1
     } else {
-        list_item_content_col(
-            item.indent_cols,
-            item.marker_len,
-            item.spaces_after_cols,
-            config,
-        )
+        item.spaces_after_cols
     };
+    let content_col =
+        list_item_content_col(item.indent_cols, item.marker_len, spaces_after_cols, config);
 
     let text_to_buffer = if content_start < item.content.len() {
         let rest = &item.content[content_start..];

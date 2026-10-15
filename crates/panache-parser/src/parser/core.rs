@@ -669,6 +669,7 @@ impl<'a> Parser<'a> {
     }
 
     fn parse_line(&mut self, line: &'a str) -> LineDispatch {
+        self.close_non_lazy_list_items(line);
         let (mut bq_depth, mut inner_content) = count_blockquote_markers(line);
         let mut bq_marker_line = line;
         let mut shifted_bq_prefix = "";
@@ -808,6 +809,9 @@ impl<'a> Parser<'a> {
             self.emit_buffered_plain_if_needed();
 
             if bq_depth > current_bq_depth {
+                // The marker line's buffered newline precedes the empty
+                // quote, just as it precedes a quote with text content.
+                self.emit_list_item_buffer_if_needed();
                 for _ in current_bq_depth..bq_depth {
                     self.builder.start_node(SyntaxKind::BLOCK_QUOTE.into());
                     self.containers.push(Container::BlockQuote {});
@@ -1765,8 +1769,6 @@ impl<'a> Parser<'a> {
 
         self.close_dedented_definition_lists(content);
 
-        self.close_list_items_without_lazy_paragraph(content);
-
         let content_indent = self.content_container_indent_to_strip();
         let (stripped_content, indent_to_emit) = strip_content_indent(content, content_indent);
 
@@ -2254,6 +2256,8 @@ impl<'a> Parser<'a> {
                     self.close_open_footnote_definition();
                 }
 
+                self.note_block_in_list_item();
+
                 let lines_consumed = {
                     let stripped = StrippedLines::new(&self.lines, self.pos, &dispatcher_prefix);
                     self.block_registry.parse_prepared(
@@ -2485,6 +2489,8 @@ impl<'a> Parser<'a> {
                 if matches!(block_match.effect, BlockEffect::OpenFootnoteDefinition) {
                     self.close_open_footnote_definition();
                 }
+
+                self.note_block_in_list_item();
 
                 let lines_consumed = {
                     let stripped = StrippedLines::new(&self.lines, self.pos, &dispatcher_prefix);

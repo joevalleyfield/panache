@@ -130,6 +130,34 @@ fn run_golden_case(case_name: &str) {
     similar_asserts::assert_eq!(expected, output, "case: {}", case_name);
 }
 
+#[test]
+fn html_block_dedented_paragraph_preserves_commonmark_html() {
+    let Ok(cmark) = which::which("cmark") else {
+        eprintln!("Skipping CommonMark reference check: cmark is not installed");
+        return;
+    };
+    let input = include_str!("fixtures/cases/html_block_dedented_paragraph_commonmark/input.md");
+    let config = Config {
+        flavor: Flavor::CommonMark,
+        extensions: Extensions::for_flavor(Flavor::CommonMark),
+        formatter_extensions: FormatterExtensions::for_flavor(Flavor::CommonMark),
+        ..Config::default()
+    };
+    let output = format(input, Some(config), None);
+    let render = |source: &str| {
+        let html = assert_cmd::Command::new(&cmark)
+            .arg("--unsafe")
+            .write_stdin(source)
+            .assert()
+            .success()
+            .get_output()
+            .stdout
+            .clone();
+        String::from_utf8(html).expect("cmark emits UTF-8 HTML")
+    };
+    similar_asserts::assert_eq!(render(input), render(&output));
+}
+
 /// Macro to generate individual test functions for each golden case.
 ///
 /// Usage: `golden_test_cases!(case1, case2, case3);`
@@ -334,6 +362,8 @@ golden_test_cases!(
     blockquote_after_list_commonmark,
     list_item_ordered_paragraph_continuation_commonmark,
     list_item_blockquote_inner_list_siblings,
+    list_item_html_block_reindent_commonmark,
+    html_block_dedented_paragraph_commonmark,
     list_item_blockquote_nested_list_issue_292,
     list_item_lazy_blockquote_marker,
     quoted_item_lazy_blockquote_marker,
@@ -379,6 +409,10 @@ golden_test_cases!(
     thematic_break_interrupts_paragraph_commonmark,
     blockquote_list_no_marker_closes_commonmark,
     empty_list_marker_blank_then_content_commonmark,
+    empty_list_marker_blank_then_block_commonmark,
+    empty_list_marker_block_then_dedent_commonmark,
+    empty_list_marker_block_then_indented_code_commonmark,
+    empty_list_marker_empty_blockquote_commonmark,
     hr_as_list_item_content,
     hr_closes_list_commonmark,
     headerless_table,

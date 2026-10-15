@@ -1,6 +1,39 @@
 use super::*;
 
 impl<'a> Parser<'a> {
+    pub(super) fn close_non_lazy_list_items(&mut self, line: &str) {
+        if self.config.dialect != crate::options::Dialect::CommonMark
+            || !matches!(
+                self.containers.last(),
+                Some(Container::ListItem { buffer, content_col, .. })
+                    if !buffer.has_open_paragraph(*content_col)
+            )
+        {
+            return;
+        }
+
+        // Lazy continuation requires an open paragraph. An emitted block,
+        // including HTML, leaves no paragraph for a dedented line to extend,
+        // and neither does buffered text that isn't a paragraph: an item
+        // that is only its marker so far (`*\n]\n -`), or a marker line
+        // that holds a heading (`- # h\nlazy`).
+        let content = strip_n_blockquote_markers(line, self.current_blockquote_depth());
+        let (content, _) = strip_content_indent(content, self.content_container_indent_to_strip());
+        let indent_cols = leading_indent(content).0;
+        if is_blank_line(content)
+            || try_parse_list_marker(
+                content,
+                self.config,
+                lists::open_list_hint_at_indent(&self.containers, indent_cols),
+            )
+            .is_some()
+        {
+            return;
+        }
+
+        self.close_lists_above_indent(indent_cols);
+    }
+
     /// Close enclosing list items (and their containing list) whose
     /// `content_col` exceeds the given indent. Under CommonMark this covers
     /// every interrupting block (HR, ATX heading, fenced code, ...): per §5.2
@@ -54,38 +87,21 @@ impl<'a> Parser<'a> {
             && buffer.is_open_grid_table(*content_col)
     }
 
-    /// Under CommonMark, close the list items a non-blank line doesn't
-    /// continue: a line indented less than the innermost item's content
-    /// column continues that item only as paragraph continuation text (a
-    /// lazy line, §5.2), so with no paragraph open in the item (it is only
-    /// its marker so far, or its last block was a heading, fenced code, an
-    /// HTML block, ...) the line closes it.
+    /// Record that a block is about to be parsed into the innermost list
+    /// item, so an item that began with a blank line (marker alone on its
+    /// line) is no longer empty.
     ///
-    /// Runs before block dispatch, so the line is then read at the level it
-    /// belongs to: `*\n]\n -` is an empty item and a setext heading.
-    /// List marker lines are left to the list parser, which decides between
-    /// sibling, nested and new lists itself.
-    pub(super) fn close_list_items_without_lazy_paragraph(&mut self, content: &str) {
-        if self.config.dialect != crate::options::Dialect::CommonMark || is_blank_line(content) {
-            return;
+    /// `marker_only` was otherwise cleared only when text entered the item's
+    /// buffer, so an item whose first block was dispatched (an HTML block,
+    /// heading, fenced code, ...) still counted as empty, and the CommonMark
+    /// rule that an empty item ends at a blank line (§5.2) closed it there:
+    /// `-\n  # h\n\n  second\n- y` split into a list, a top-level paragraph,
+    /// and a second list. Containers opened in the item are covered by
+    /// `ContainerStack::push`.
+    pub(super) fn note_block_in_list_item(&mut self) {
+        if let Some(Container::ListItem { marker_only, .. }) = self.containers.stack.last_mut() {
+            *marker_only = false;
         }
-        let Some(Container::ListItem {
-            content_col,
-            buffer,
-            ..
-        }) = self.containers.last()
-        else {
-            return;
-        };
-        let (indent_cols, _) = leading_indent(content);
-        if indent_cols >= *content_col
-            || buffer.has_open_paragraph(*content_col)
-            || lists::try_parse_list_marker(content, self.config, lists::OpenListHint::None)
-                .is_some()
-        {
-            return;
-        }
-        self.close_lists_above_indent(indent_cols);
     }
 
     pub(super) fn emit_list_item_buffer_if_needed(&mut self) {
