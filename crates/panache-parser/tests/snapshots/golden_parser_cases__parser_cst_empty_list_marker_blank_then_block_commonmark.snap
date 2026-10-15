@@ -42,18 +42,16 @@ DOCUMENT@0..131
       PLAIN@69..70
         NEWLINE@69..70 "\n"
       CODE_BLOCK@70..89
-        LINE_PREFIX@70..71 " "
-        WHITESPACE@71..72 " "
+        LINE_PREFIX@70..72 "  "
         CODE_FENCE_OPEN@72..76
           CODE_FENCE_MARKER@72..75 "```"
           NEWLINE@75..76 "\n"
         CODE_CONTENT@76..83
-          LINE_PREFIX@76..77 " "
-          TEXT@77..82 " code"
+          LINE_PREFIX@76..78 "  "
+          TEXT@78..82 "code"
           NEWLINE@82..83 "\n"
-        LINE_PREFIX@83..84 " "
-        CODE_FENCE_CLOSE@84..89
-          WHITESPACE@84..85 " "
+        LINE_PREFIX@83..85 "  "
+        CODE_FENCE_CLOSE@85..89
           CODE_FENCE_MARKER@85..88 "```"
           NEWLINE@88..89 "\n"
       BLANK_LINE@89..90
