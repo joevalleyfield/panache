@@ -1140,6 +1140,7 @@ golden_test_cases!(
     list_item_grid_table_marker_line_pandoc,
     list_item_html_div_multiline_open_commonmark,
     list_item_lazy_line_needs_paragraph_commonmark,
+    blockquote_after_list_item_commonmark,
     list_item_lazy_checkbox_paragraph_gfm,
     list_item_lazy_unicode_whitespace_commonmark,
     list_item_html_div_multiline_open_pandoc,
