@@ -2468,8 +2468,13 @@ impl<'a> Parser<'a> {
                             .as_ref()
                             .and_then(|p| p.downcast_ref::<super::block_dispatcher::ListPrepared>())
                         && prepared.indent_cols >= paragraphs::current_content_col(&self.containers)
-                        && lists::marker_start_number(&prepared.marker)
+                        && (lists::marker_start_number(&prepared.marker)
                             .is_some_and(|start| start != 1)
+                            || content
+                                .get(prepared.indent_bytes + prepared.marker_len..)
+                                .unwrap_or("")
+                                .trim()
+                                .is_empty())
                     {
                         self.append_lazy_continuation_line(
                             line_to_append.unwrap_or(self.lines[self.pos]),
