@@ -104,6 +104,16 @@ impl<'a> Parser<'a> {
         }
     }
 
+    /// Whether the innermost list item's buffered text ends in an open
+    /// paragraph (not a buffered single-line ATX heading or thematic break).
+    pub(super) fn list_item_paragraph_open(&self) -> bool {
+        matches!(
+            self.containers.last(),
+            Some(Container::ListItem { buffer, content_col, .. })
+                if buffer.has_open_paragraph(*content_col)
+        )
+    }
+
     pub(super) fn emit_list_item_buffer_if_needed(&mut self) {
         if let Some(Container::ListItem { buffer, .. }) = self.containers.stack.last_mut()
             && !buffer.is_empty()

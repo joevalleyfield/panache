@@ -2461,7 +2461,7 @@ impl<'a> Parser<'a> {
                     if matches!(block_match.effect, BlockEffect::OpenList)
                         && self.config.dialect == crate::options::Dialect::CommonMark
                         && lists::in_list(&self.containers)
-                        && (self.is_paragraph_open() || self.is_list_item_content_open())
+                        && (self.is_paragraph_open() || self.list_item_paragraph_open())
                         && !dispatcher_ctx.in_marker_only_list_item
                         && let Some(prepared) = block_match
                             .payload
